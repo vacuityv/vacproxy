@@ -153,7 +153,7 @@ func (c *serverConnnection) preProcessRequest() (rawReqHeader bytes.Buffer, host
 
 // auth provide basic authentication
 func (c *serverConnnection) checkAuth(credential string) bool {
-	if c.server.isNeedAuth() == false || c.server.validateCredential(credential) {
+	if c.server.isNeedAuth() == false || c.server.validateCredential(c.logId, credential) {
 		return true
 	}
 	// first send 407 to client

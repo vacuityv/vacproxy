@@ -111,13 +111,13 @@ func (s *Server) isNeedAuth() bool {
 *
 check proxy auth: Basic credential
 */
-func (s *Server) validateCredential(basicCredential string) bool {
+func (s *Server) validateCredential(logId int64, basicCredential string) bool {
 
 	c := strings.Split(basicCredential, " ")
 	if len(c) == 2 && strings.EqualFold(c[0], "Basic") && c[1] == s.credential {
 		return true
 	}
-	log.Printf("auth failed: %s", basicCredential)
+	log.Printf("%d-auth failed: %s", logId, basicCredential)
 	return false
 }
 
