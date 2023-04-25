@@ -31,6 +31,9 @@ func (c *serverConnnection) serve() {
 		return
 	}
 
+	localForClientIp, localForClientPort, clientIp, clientPort := getIpAddr(c.rwc)
+	log.Printf("%d-client connect %s:%d to %s:%d", c.logId, clientIp, clientPort, localForClientIp, localForClientPort)
+
 	if c.checkAuth(credential) == false {
 		log.Printf("%d-proxy auth fail", c.logId)
 		c.rwc.Write([]byte("Error: proxy auth fail"))
@@ -45,7 +48,6 @@ func (c *serverConnnection) serve() {
 		return
 	}
 
-	localForClientIp, localForClientPort, clientIp, clientPort := getIpAddr(c.rwc)
 	localForServerIp, localForServerPort, serverIp, serverPort := getIpAddr(remoteConn)
 
 	// check client ip
@@ -68,7 +70,6 @@ func (c *serverConnnection) serve() {
 		}
 	}
 
-	log.Printf("%d-client connect %s:%d to %s:%d", c.logId, clientIp, clientPort, localForClientIp, localForClientPort)
 	log.Printf("%d-server connect %s:%d to %s:%d", c.logId, localForServerIp, localForServerPort, serverIp, serverPort)
 
 	if isHttps {
