@@ -4,8 +4,10 @@ import (
 	"bufio"
 	"encoding/base64"
 	"fmt"
+	"gopkg.in/yaml.v3"
 	"log"
 	"net"
+	"os"
 	"strings"
 )
 
@@ -13,14 +15,34 @@ type Server struct {
 	listener   net.Listener
 	addr       string
 	credential string
+	configFile string
+	config     VacConfig
+	inMatch    *Node
+	outMatch   *Node
 }
 
 /*
 *
 create proxy server
 */
-func NewServer(addr, credential string) *Server {
-	return &Server{addr: addr, credential: base64.StdEncoding.EncodeToString([]byte(credential))}
+func NewServer(addr, configFile string) *Server {
+
+	var config, inMatch, outMatch = initConfig(configFile)
+
+	credential := ""
+	if config.Auth.Enabled && len(config.Auth.User) > 0 && len(config.Auth.Password) > 0 {
+		credential = base64.StdEncoding.EncodeToString([]byte(config.Auth.User + ":" + config.Auth.Password))
+		log.Printf("init server with auth")
+	}
+
+	return &Server{
+		addr:       addr,
+		credential: credential,
+		configFile: configFile,
+		config:     config,
+		inMatch:    inMatch,
+		outMatch:   outMatch,
+	}
 }
 
 /*
@@ -43,6 +65,9 @@ func (s *Server) Start() {
 		showAddr = "http://0.0.0.0" + showAddr
 	}
 	log.Printf("listen address: %s\n", showAddr)
+	// config
+	log.Printf("vacproxy config:%v", s.config)
+
 	log.Printf("waiting for connection...\n")
 
 	sf, err := NewSnowflake(1)
@@ -87,10 +112,12 @@ func (s *Server) isNeedAuth() bool {
 check proxy auth: Basic credential
 */
 func (s *Server) validateCredential(basicCredential string) bool {
+
 	c := strings.Split(basicCredential, " ")
 	if len(c) == 2 && strings.EqualFold(c[0], "Basic") && c[1] == s.credential {
 		return true
 	}
+	log.Printf("auth failed: %s", basicCredential)
 	return false
 }
 
@@ -99,5 +126,64 @@ func (s *Server) validateCredential(basicCredential string) bool {
 stop proxy server
 */
 func (s *Server) Stop() {
+	log.Printf("server ready to terminating")
 	s.listener.Close()
+	log.Printf("server terminated")
+}
+
+/*
+*
+reload config file
+*/
+func (s *Server) Reload() {
+	log.Println("server ready to reload")
+	var config, inMatch, outMatch = initConfig(s.configFile)
+	s.config = config
+	s.inMatch = inMatch
+	s.outMatch = outMatch
+
+	credential := ""
+	if config.Auth.Enabled && len(config.Auth.User) > 0 && len(config.Auth.Password) > 0 {
+		credential = base64.StdEncoding.EncodeToString([]byte(config.Auth.User + ":" + config.Auth.Password))
+		log.Printf("reload server with auth: %s", credential)
+	}
+	s.credential = credential
+
+	log.Printf("server reload success:%v", config)
+}
+
+func initConfig(configFile string) (VacConfig, *Node, *Node) {
+	log.Printf("reading config file: %s", configFile)
+	var config VacConfig
+	file, err := os.ReadFile(configFile)
+	if err != nil {
+		log.Fatalf("Failed to read file: %v", err)
+	}
+
+	err = yaml.Unmarshal(file, &config)
+	if err != nil {
+		log.Fatalf("Failed to unmarshal file: %v", err)
+	}
+	var inMatch, outMatch = initIpTrieTree(config)
+
+	return config, inMatch, outMatch
+}
+
+func initIpTrieTree(config VacConfig) (*Node, *Node) {
+
+	inMatch := NewNode()
+
+	if len(config.InAllowList) > 0 {
+		for _, ip := range config.InAllowList {
+			inMatch.Insert(ip)
+		}
+	}
+
+	outMatch := NewNode()
+	if len(config.OutAllowList) > 0 {
+		for _, domain := range config.OutAllowList {
+			outMatch.Insert(domain)
+		}
+	}
+	return inMatch, outMatch
 }

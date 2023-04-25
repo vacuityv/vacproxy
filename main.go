@@ -11,38 +11,32 @@ import (
 
 var (
 	signal = flag.String("s", "", `Send signal to the daemon:
-  stop — shutdown
+  stop — shutdown, same as -q
   reload — reloading the configuration file`)
 )
 
 var (
-	stop = make(chan struct{})
-	done = make(chan struct{})
+	stop   = make(chan struct{})
+	done   = make(chan struct{})
+	reload = make(chan struct{})
 )
 
 func main() {
 
 	addr := flag.String("bind", "0.0.0.0:7777", "proxy bind address")
-	auth := flag.String("auth", "", "basic credentials(username:password)")
 	logf := flag.String("log", "./vacproxy.log", "the log file path")
 	pidf := flag.String("pid", "./vacproxy.pid", "the pid file path")
 	quit := flag.Bool("q", false, "quit proxy")
-	nd := flag.Bool("nd", false, "not run as daemon")
+	configFile := flag.String("config", "./config.yml", "config file")
 	flag.Parse()
 
 	if *quit || *signal == "stop" {
 		*signal = "stop"
-		*nd = false
 		*quit = true
 	}
 
-	if *nd {
-		startWorker(*addr, *auth)
-		return
-	}
-
 	daemon.AddCommand(daemon.StringFlag(signal, "stop"), syscall.SIGTERM, termHandler)
-	//daemon.AddCommand(daemon.StringFlag(signal, "reload"), syscall.SIGHUP, reloadHandler)
+	daemon.AddCommand(daemon.StringFlag(signal, "reload"), syscall.SIGHUP, reloadHandler)
 
 	cntxt := &daemon.Context{
 		PidFileName: *pidf,
@@ -75,30 +69,44 @@ func main() {
 	log.Println("daemon started")
 
 	log.Println(*addr)
-	startWorker(*addr, *auth)
+	go startWorker(*addr, *configFile)
 
 	err = daemon.ServeSignals()
 	if err != nil {
 		log.Fatalf("Error: %s", err.Error())
 	}
-
 	log.Println("daemon terminated")
 
 }
 
-func startWorker(addr string, auth string) {
+func startWorker(addr string, configFile string) {
 	// main worker
-	server := service.NewServer(addr, auth)
+	server := service.NewServer(addr, configFile)
+	// watch the signal
+	go watchSig(server)
+	// start server
 	server.Start()
-	select {
-	case <-stop:
-		server.Stop()
-	default:
+
+}
+
+func watchSig(s *service.Server) {
+	for {
+		select {
+		case <-stop:
+			s.Stop()
+		case <-reload:
+			s.Reload()
+		default:
+		}
 	}
 }
 
+func reloadHandler(sig os.Signal) error {
+	reload <- struct{}{}
+	return nil
+}
+
 func termHandler(sig os.Signal) error {
-	log.Println("terminating...")
 	stop <- struct{}{}
 	if sig == syscall.SIGQUIT {
 		<-done

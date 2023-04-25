@@ -45,11 +45,37 @@ func (c *serverConnnection) serve() {
 		return
 	}
 
+	localForClientIp, localForClientPort, clientIp, clientPort := getIpAddr(c.rwc)
+	localForServerIp, localForServerPort, serverIp, serverPort := getIpAddr(remoteConn)
+
+	// check client ip
+	if len(c.server.config.InAllowList) > 0 && !c.server.inMatch.Match(clientIp) {
+		log.Printf("%d-clientIp not in allow list: %s", c.logId, clientIp)
+		_, err = c.rwc.Write([]byte("HTTP/1.1 401 clientIp not in allow list " + clientIp + "\r\n\r\n"))
+		if err != nil {
+			log.Printf("%s", err.Error())
+			return
+		}
+	}
+	// check server ip
+	domain := strings.Split(remote, ":")[0]
+	if len(c.server.config.OutAllowList) > 0 && !c.server.outMatch.Match(domain) {
+		log.Printf("%d-server host not in allow list: %s", c.logId, domain)
+		_, err = c.rwc.Write([]byte("HTTP/1.1 401 server host not in allow list " + domain + "\r\n\r\n"))
+		if err != nil {
+			log.Printf("%s", err.Error())
+			return
+		}
+	}
+
+	log.Printf("%d-client connect %s:%d to %s:%d", c.logId, clientIp, clientPort, localForClientIp, localForClientPort)
+	log.Printf("%d-server connect %s:%d to %s:%d", c.logId, localForServerIp, localForServerPort, serverIp, serverPort)
+
 	if isHttps {
 		// if https, should sent 200 to client
 		_, err = c.rwc.Write([]byte("HTTP/1.1 200 Connection established\r\n\r\n"))
 		if err != nil {
-			log.Fatalln(err)
+			log.Printf("%s", err.Error())
 			return
 		}
 	} else {
@@ -63,12 +89,7 @@ func (c *serverConnnection) serve() {
 
 	// build bidirectional-streams
 	log.Printf("%d-begin tunnel", c.logId)
-	localForClientIp, localForClientPort, clientIp, clientPort := getIpAddr(c.rwc)
-	localForServerIp, localForServerPort, serverIp, serverPort := getIpAddr(remoteConn)
-	log.Printf("%d-client connect %s:%d to %s:%d", c.logId, clientIp, clientPort, localForClientIp, localForClientPort)
-	log.Printf("%d-server connect %s:%d to %s:%d", c.logId, localForServerIp, localForServerPort, serverIp, serverPort)
 	c.tunnel(remoteConn)
-	log.Printf("%d-end tunnel", c.logId)
 }
 
 /*
@@ -151,6 +172,7 @@ func (c *serverConnnection) tunnel(remoteConn net.Conn) {
 	}
 	defer remoteConn.Close()
 	defer c.rwc.Close()
+	defer log.Printf("%d-end tunnel", c.logId)
 
 	clientDoneCh, serverDoneCh := make(chan struct{}), make(chan struct{})
 	go dataCopy(remoteConn, c.rwc, serverDoneCh)
