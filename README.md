@@ -1,13 +1,9 @@
 vacproxy is a simple http proxy with basic authentication support.
 
-Installing from source
+Get binary tool
 ----------------------
 
-To install, run
-
-    $ go get github.com/vacuityv/vacproxy
-
-You will now find a `vacproxy` binary in your `$GOPATH/bin` directory.
+Download the zip you will get a vacproxy binary and a config file.
 
 Usage
 -----
