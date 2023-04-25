@@ -2,14 +2,14 @@ name: test
 
 # 代理鉴权配置，enabled为true且user和password均不为空代表鉴权
 auth:
-  enabled: true
+  enabled: false
   user: test
   password: 1234
 
 # 请求ip白名单，放空代表不限制
 inAllowList:
-  - 127.0.0.1
-  - 192.168.100.*
+#  - 127.0.0.1
+#  - 192.168.100.*
 
 # 目标域名/ip白名单，放空代表不限制
 outAllowList:
