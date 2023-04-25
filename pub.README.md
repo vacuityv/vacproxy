@@ -57,6 +57,12 @@ $ vacproxy -help
 ./vacproxy -s -stop
 ```
 
+5、验证运行情况
+
+```shell
+curl -i --proxy http://test:1234@127.0.0.1:7777 https://www.baidu.com
+```
+
 ## 配置文件说明
 
 ```yml

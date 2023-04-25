@@ -27,7 +27,6 @@ A http tool implemented by go language, support multi-platform
 ```
 this will run the program with default config.yml and 7777 port
 
-
 Others：
 
 ```shell
@@ -55,6 +54,12 @@ $ vacproxy -help
 ./vacproxy -q
 # or
 ./vacproxy -s -stop
+```
+
+5、check status
+
+```shell
+curl -i --proxy http://test:1234@127.0.0.1:7777 https://bing.com
 ```
 
 ## config.yml
