@@ -32,22 +32,22 @@ build-all:
 	make clean
 	mkdir -p ./build
 	mkdir -p ./build/linux-amd64
-	cp config.yml ./build/linux-amd64
+	cp config.yaml ./build/linux-amd64
 	make build-linux-amd64
 	mkdir -p ./build/linux-arm64
-	cp config.yml ./build/linux-arm64
+	cp config.yaml ./build/linux-arm64
 	make build-linux-arm64
 	mkdir -p ./build/darwin-amd64
-	cp config.yml ./build/darwin-amd64
+	cp config.yaml ./build/darwin-amd64
 	make build-darwin-amd64
 	mkdir -p ./build/darwin-arm64
-	cp config.yml ./build/darwin-arm64
+	cp config.yaml ./build/darwin-arm64
 	make build-darwin-arm64
 	mkdir -p ./build/windows-amd64
-	cp config.yml ./build/windows-amd64
+	cp config.yaml ./build/windows-amd64
 	make build-windows-amd64
 	mkdir -p ./build/windows-arm64
-	cp config.yml ./build/windows-arm64
+	cp config.yaml ./build/windows-arm64
 	make build-windows-arm64
 
 .PHONY: clean

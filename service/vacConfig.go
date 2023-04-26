@@ -2,6 +2,8 @@ package service
 
 type VacConfig struct {
 	Name string
+	Bind string
+	Log  string
 	Auth struct {
 		Enabled  bool   `yaml: "enabled"`
 		User     string `yaml: "user"`
