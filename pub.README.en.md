@@ -1,6 +1,6 @@
 # vac-go-proxy
 
-[中文说明](https://github.com/vacuityv/vac-go-proxy/blob/main/README.md)
+[English](https://github.com/vacuityv/vac-go-proxy/blob/main/README.en.md)｜[中文](https://github.com/vacuityv/vac-go-proxy/blob/main/README.md)
 
 A http tool implemented by go language, support multi-platform
 
