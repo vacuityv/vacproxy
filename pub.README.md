@@ -2,7 +2,7 @@
 
 [English](https://github.com/vacuityv/vac-go-proxy/blob/main/README.en.md)｜[中文](https://github.com/vacuityv/vac-go-proxy/blob/main/README.md)
 
-用go语言实现的一个http代理工具，支持多端设备
+用go语言实现的一个http代理工具，支持多平台，支持安装为服务启动或者直接启动
 
 ## 功能支持
 
@@ -10,76 +10,77 @@
 
 2、请求客户端ip白名单设置
 
-3、请求目标域名ip/白名单设置
+3、请求目标域名/ip白名单设置
 
-4、动态更新配置无需重启[Windows平台版本不支持]
 
-## 使用方式
+## 使用
 
-1、下载对应系统的zip包并解压
+使用程序所在目录的 config.yaml 作为配置文件
 
-2、到相应目录下
+以下为linux平台命令，其他平台请参照修改
 
-3、运行
-
-```shell
-./vacproxy 
-```
-
-会默认使用同一目录下的config.yml配置文件并使用默认的7777端口启动代理
-
-其他启动参数：
+安装为服务：
 
 ```shell
-$ vacproxy -help
-    Usage of ./vacproxy:
-        -bind string
-            proxy bind address (default "0.0.0.0:7777")
-        -config string
-            config file (default "./config.yml")
-        -log string
-            the log file path (default "./vacproxy.log")
-        -pid string
-            the pid file path[Windows platform not support] (default "./vacproxy.pid")
-        -q  
-            quit proxy[Windows platform not support]
-        -s string
-            Send signal to the daemon[Windows platform not support]:
-                stop — shutdown, same as -q
-                reload — reloading the configuration file
+./vacproxy install
 ```
 
-4、停止
-
-windows:
-
-由于目前Windows平台暂不支持后台运行，因此只能 ctrl+c 停止
-
-其他平台:
+启动服务：
 
 ```shell
-./vacproxy -q
-# or
-./vacproxy -s -stop
+service vacproxy start
 ```
 
-5、验证运行情况
+停止服务：
+
+```shell
+service vacproxy stop
+```
+
+重启服务：
+
+```shell
+service vacproxy restart
+```
+
+卸载服务：
+
+```shell
+./vacproxy uninstall
+```
+
+
+
+
+
+验证运行情况
 
 ```shell
 # 无鉴权：
-curl -i --proxy http://127.0.0.1:7777 https://www.baidu.com
+curl -i --proxy http://127.0.0.1:7777 https://sample.com
 # 有鉴权：
-curl -i --proxy http://test:1234@127.0.0.1:7777 https://www.baidu.com
+curl -i --proxy http://test:1234@127.0.0.1:7777 https://sample.com
+```
+
+或者你也可以使用如下参数直接运行：
+
+```shell
+./vacproxy -console
 ```
 
 ## 配置文件说明
 
-```yml
-name: test
+```yaml
+name: vacproxy
+
+bind: 0.0.0.0:7777
+
+# 日志配置/log file config，默认在当前目录的vacproxy.log
+#log: /Users/vacuity/log/vacproxy.log
 
 # 代理鉴权配置，enabled为true且user和password均不为空代表鉴权
 auth:
-  enabled: true
+  enabled: false
   user: test
   password: 1234
 
@@ -95,8 +96,4 @@ outAllowList:
 #  - baidu.com
 ```
 
-更改配置文件后可以使用reload来重新载入，达到免重启生效
-
-```shell
-./vacproxy -s reload
-```
+更改配置文件后可以使用restart来重启生效

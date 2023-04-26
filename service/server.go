@@ -15,19 +15,19 @@ type Server struct {
 	listener   net.Listener
 	addr       string
 	credential string
-	configFile string
-	config     VacConfig
-	inMatch    *Node
-	outMatch   *Node
+	//configFile string
+	config   VacConfig
+	inMatch  *Node
+	outMatch *Node
 }
 
 /*
 *
 create proxy server
 */
-func NewServer(addr, configFile string) *Server {
+func NewServer(config VacConfig, inMatch *Node, outMatch *Node) *Server {
 
-	var config, inMatch, outMatch = initConfig(configFile)
+	//var config, inMatch, outMatch = initConfig(configFile)
 
 	credential := ""
 	if config.Auth.Enabled && len(config.Auth.User) > 0 && len(config.Auth.Password) > 0 {
@@ -36,12 +36,12 @@ func NewServer(addr, configFile string) *Server {
 	}
 
 	return &Server{
-		addr:       addr,
+		addr:       config.Bind,
 		credential: credential,
-		configFile: configFile,
-		config:     config,
-		inMatch:    inMatch,
-		outMatch:   outMatch,
+		//configFile: configFile,
+		config:   config,
+		inMatch:  inMatch,
+		outMatch: outMatch,
 	}
 }
 
@@ -135,25 +135,25 @@ func (s *Server) Stop() {
 *
 reload config file
 */
-func (s *Server) Reload() {
-	log.Println("server ready to reload")
-	var config, inMatch, outMatch = initConfig(s.configFile)
-	s.config = config
-	s.inMatch = inMatch
-	s.outMatch = outMatch
+//func (s *Server) Reload() {
+//	log.Println("server ready to reload")
+//	var config, inMatch, outMatch = initConfig(s.configFile)
+//	s.config = config
+//	s.inMatch = inMatch
+//	s.outMatch = outMatch
+//
+//	credential := ""
+//	if config.Auth.Enabled && len(config.Auth.User) > 0 && len(config.Auth.Password) > 0 {
+//		credential = base64.StdEncoding.EncodeToString([]byte(config.Auth.User + ":" + config.Auth.Password))
+//		log.Printf("reload server with auth: %s", credential)
+//	}
+//	s.credential = credential
+//
+//	log.Printf("server reload success:%v", config)
+//}
 
-	credential := ""
-	if config.Auth.Enabled && len(config.Auth.User) > 0 && len(config.Auth.Password) > 0 {
-		credential = base64.StdEncoding.EncodeToString([]byte(config.Auth.User + ":" + config.Auth.Password))
-		log.Printf("reload server with auth: %s", credential)
-	}
-	s.credential = credential
+func InitConfig(configFile string) (VacConfig, *Node, *Node) {
 
-	log.Printf("server reload success:%v", config)
-}
-
-func initConfig(configFile string) (VacConfig, *Node, *Node) {
-	log.Printf("reading config file: %s", configFile)
 	var config VacConfig
 	file, err := os.ReadFile(configFile)
 	if err != nil {
