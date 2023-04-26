@@ -2,7 +2,8 @@ name: vacproxy
 
 bind: 0.0.0.0:7777
 
-log: /Users/vacuity/Work/cache/3/vacproxy.log
+# 日志配置/log file config
+#log: /Users/vacuity/log/vacproxy.log
 
 # 代理鉴权配置，enabled为true且user和password均不为空代表鉴权
 auth:

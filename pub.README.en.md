@@ -2,99 +2,92 @@
 
 [English](https://github.com/vacuityv/vac-go-proxy/blob/main/README.en.md)｜[中文](https://github.com/vacuityv/vac-go-proxy/blob/main/README.md)
 
-A http tool implemented by go language, support multi-platform
+A HTTP proxy tool implemented in Go language, supporting multiple platforms, and can be installed as a service or run directly.
+
 
 ## Function support
 
-1、optional username and password verification
+1. Optional username and password authentication
 
-2、set client ip whitelist/allowlist
+2. Setting of client IP whitelist for requests
 
-3、set target ip/domain whitelist/allowlist
-
-4、reload config without restart[Windows platform not support]
+3. Setting of target domain name/IP whitelist for requests
 
 ## Usage
 
-1、download the zip package and unzip
+Use the config.yaml in the program directory as the configuration file.
 
-2、cd to the directory
+The following commands are for the Linux platform. Please modify them for other platforms.
 
-3、run
-
-```shell
-./vacproxy 
-```
-this will run the program with default config.yml and 7777 port
-
-Others：
+Install as a service:
 
 ```shell
-$ vacproxy -help
-    Usage of ./vacproxy:
-        -bind string
-            proxy bind address (default "0.0.0.0:7777")
-        -config string
-            config file (default "./config.yml")
-        -log string
-            the log file path (default "./vacproxy.log")
-        -pid string
-            the pid file path[Windows platform not support] (default "./vacproxy.pid")
-        -q  
-            quit proxy[Windows platform not support]
-        -s string
-            Send signal to the daemon[Windows platform not support]:
-                stop — shutdown, same as -q
-                reload — reloading the configuration file
+./vacproxy install
 ```
 
-4、stop
-
-windows:
-
-Windows platform not support run with daemon,so you can only use ctrl+c to stop the program
-
-others:
+Start the service:
 
 ```shell
-./vacproxy -q
-# or
-./vacproxy -s -stop
+service vacproxy start
 ```
 
-5、check status
+Stop the service:
 
 ```shell
+service vacproxy stop
+```
+
+Restart the service:
+
+```shell
+service vacproxy restart
+```
+
+Uninstall the service:
+
+```shell
+./vacproxy uninstall
+```
+
+Verify the running status:
+
+```shell
+# Without authentication:
 curl -i --proxy http://127.0.0.1:7777 https://sample.com
-# or with auth:
+# With authentication:
 curl -i --proxy http://test:1234@127.0.0.1:7777 https://sample.com
 ```
 
-## config.yml
+Alternatively, you can use the following parameters to run directly:
 
-```yml
-name: test
+```shell
+./vacproxy -console
+```
 
-# auth config，enabled=true and user and password not "" will verify the credential
+## Configuration file
+
+```yaml
+bind: 0.0.0.0:7777
+
+# Log configuration/log file configuration, the default file is vacproxy.log in the current directory
+#log: /Users/vacuity/log/vacproxy.log
+
+# Proxy authentication configuration, if enabled is true and both user and password are not empty, authentication is enabled
 auth:
-  enabled: true
+  enabled: false
   user: test
   password: 1234
 
-# client ip whitelist, won't check if none ip here
+# Client IP whitelist for requests, leave empty for no restrictions
 inAllowList:
 #  - 127.0.0.1
 #  - 192.168.100.*
 
-# target ip/domain whitelist, won't check if none ip/domain here
+# Target domain name/IP whitelist for requests, leave empty for no restrictions
 outAllowList:
 #  - weixin.qq.com
 #  - alipay.com
 #  - baidu.com
 ```
 
-you can use reload signal to reload config file without restart program:
-
-```shell
-./vacproxy -s reload
-```
+After changing the configuration file, you can use the restart command to take effect.

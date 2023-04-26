@@ -90,36 +90,32 @@ func ProxyService(config VacConfig, inMatch *Node, outMatch *Node) {
 	}
 }
 
-func GetConfigPath() (string, error) {
+func GetExecPath() (string, error) {
 	fullExecPath, err := os.Executable()
 	if err != nil {
 		return "", err
 	}
 	dir, _ := filepath.Split(fullExecPath)
-	//ext := filepath.Ext(execname)
-	//name := execname[:len(execname)-len(ext)]
+	return dir, nil
+}
+
+func GetConfigPath() (string, error) {
+	dir, err := GetExecPath()
+	if err != nil {
+		return "", err
+	}
 	return filepath.Join(dir, "config.yaml"), nil
 }
 
-//func getConfig(path string) (*Config, error) {
-//	f, err := os.Open(path)
-//	if err != nil {
-//		return nil, err
-//	}
-//	defer f.Close()
-//
-//	conf := &Config{}
-//
-//	r := json.NewDecoder(f)
-//	err = r.Decode(&conf)
-//	if err != nil {
-//		return nil, err
-//	}
-//	return conf, nil
-//}
-
 func StartProxy(server *Server, consoleFlag bool) {
-	file, err := os.OpenFile(server.config.Log, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+
+	logPath := server.config.Log
+	if len(logPath) == 0 {
+		dir, _ := GetExecPath()
+		logPath = filepath.Join(dir, "vacproxy.log")
+	}
+
+	file, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("Failed to open log file: %s", err.Error())
 		fmt.Printf("Failed to open log file: %s", err.Error())
