@@ -46,6 +46,9 @@ build-all:
 	mkdir -p ./build/windows-amd64
 	cp config.yml ./build/windows-amd64
 	make build-windows-amd64
+	mkdir -p ./build/windows-arm64
+	cp config.yml ./build/windows-arm64
+	make build-windows-arm64
 
 .PHONY: clean
 clean:
