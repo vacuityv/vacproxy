@@ -12,7 +12,7 @@ A http tool implemented by go language, support multi-platform
 
 3、set target ip/domain whitelist/allowlist
 
-4、reload config without restart
+4、reload config without restart[Windows platform not support]
 
 ## Usage
 
@@ -39,16 +39,22 @@ $ vacproxy -help
         -log string
             the log file path (default "./vacproxy.log")
         -pid string
-            the pid file path (default "./vacproxy.pid")
+            the pid file path[Windows platform not support] (default "./vacproxy.pid")
         -q  
-            quit proxy
+            quit proxy[Windows platform not support]
         -s string
-            Send signal to the daemon:
+            Send signal to the daemon[Windows platform not support]:
                 stop — shutdown, same as -q
                 reload — reloading the configuration file
 ```
 
 4、stop
+
+windows:
+
+Windows platform not support run with daemon,so you can only use ctrl+c to stop the program
+
+others:
 
 ```shell
 ./vacproxy -q
@@ -59,7 +65,9 @@ $ vacproxy -help
 5、check status
 
 ```shell
-curl -i --proxy http://test:1234@127.0.0.1:7777 https://bing.com
+curl -i --proxy http://127.0.0.1:7777 https://sample.com
+# or with auth:
+curl -i --proxy http://test:1234@127.0.0.1:7777 https://sample.com
 ```
 
 ## config.yml

@@ -12,7 +12,7 @@
 
 3、请求目标域名ip/白名单设置
 
-4、动态更新配置无需重启
+4、动态更新配置无需重启[Windows平台版本不支持]
 
 ## 使用方式
 
@@ -51,6 +51,12 @@ $ vacproxy -help
 
 4、停止
 
+windows:
+
+由于目前Windows平台暂不支持后台运行，因此只能 ctrl+c 停止
+
+其他平台:
+
 ```shell
 ./vacproxy -q
 # or
@@ -60,6 +66,9 @@ $ vacproxy -help
 5、验证运行情况
 
 ```shell
+# 无鉴权：
+curl -i --proxy http://127.0.0.1:7777 https://www.baidu.com
+# 有鉴权：
 curl -i --proxy http://test:1234@127.0.0.1:7777 https://www.baidu.com
 ```
 

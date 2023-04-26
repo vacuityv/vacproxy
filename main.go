@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	signal = flag.String("s", "", `Send signal to the daemon:
+	signal = flag.String("s", "", `Send signal to the daemon[Windows platform not support]:
   stop — shutdown, same as -q
   reload — reloading the configuration file`)
 )
@@ -28,8 +28,8 @@ func main() {
 
 	addr := flag.String("bind", "0.0.0.0:7777", "proxy bind address")
 	logf := flag.String("log", "./vacproxy.log", "the log file path")
-	pidf := flag.String("pid", "./vacproxy.pid", "the pid file path")
-	quit := flag.Bool("q", false, "quit proxy")
+	pidf := flag.String("pid", "./vacproxy.pid", "the pid file path[Windows platform not support]")
+	quit := flag.Bool("q", false, "quit proxy[Windows platform not support]")
 	configFile := flag.String("config", "./config.yml", "config file")
 	flag.Parse()
 
